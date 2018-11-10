@@ -11,6 +11,8 @@ Adafruit_SSD1306 display(OLED_RESET); // SCL: D1, SDA: D2
 
 Weather weather(OPEN_WEATHER_MAP_APP_ID);
 WeatherData currentWeather;
+unsigned long lastWeatherUpdateMillis = 0;
+unsigned long updateWeatherIntervalMillis = WEATHER_UPDATE_INTERVAL_MILLIS;
 
 #if (SSD1306_LCDHEIGHT != 64)
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
@@ -67,6 +69,19 @@ void printLineCut(byte lineIndex, String text) {
   display.print(replacedText);
 }
 
+boolean updateWeatherData() {
+  // check if new update from job is needed
+  unsigned long currentMillis = millis();
+  unsigned long intervalSinceLastUpdate = currentMillis - lastWeatherUpdateMillis;
+
+  if (lastWeatherUpdateMillis == 0 || intervalSinceLastUpdate > updateWeatherIntervalMillis) {
+    currentWeather = weather.getCurrentWeather(WEATHER_CITY);
+    lastWeatherUpdateMillis = currentMillis;
+    return true;
+  }
+  return false;
+}
+
 void setup() {
   Serial.begin(115200);
   initializeDisplay();
@@ -74,16 +89,11 @@ void setup() {
   pinMode(D7,INPUT);
 }
 
-int i = 0;
 void loop() {
-  if (i == 0) {
-    // load only once
-    currentWeather = weather.getCurrentWeather(WEATHER_CITY);
-    i++;
+  if (updateWeatherData()) {
+    display.clearDisplay();
+    printLineCut(0, String(WEATHER_CITY) + ": " + String(currentWeather.temperatureCelsius) + "°");
+    printLineCut(1, currentWeather.weatherDescription);
+    display.display();
   }
-
-  display.clearDisplay();
-  printLineCut(0, String(WEATHER_CITY) + ": " + String(currentWeather.temperatureCelsius) + "°");
-  printLineCut(1, currentWeather.weatherDescription);
-  display.display();
 }
