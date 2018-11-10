@@ -12,6 +12,8 @@ typedef struct {
   String weatherDescription;
   String icon;
   String error;
+  const unsigned char* iconBitmap;
+  boolean iconBitmapSet;
 } WeatherData;
 
 class Weather

@@ -13,17 +13,16 @@ Weather weather(OPEN_WEATHER_MAP_APP_ID);
 WeatherData currentWeather;
 unsigned long lastWeatherUpdateMillis = 0;
 unsigned long updateWeatherIntervalMillis = WEATHER_UPDATE_INTERVAL_MILLIS;
+int textSize = 1;
 
 #if (SSD1306_LCDHEIGHT != 64)
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
 #endif
 
-// convert images to byte array: http://javl.github.io/image2cpp/
-const unsigned char PROGMEM sun[] = {
-  // size: 16x16
-  0xfe, 0x7f, 0xfe, 0x7f, 0xce, 0x73, 0xc6, 0x63, 0xe8, 0x17, 0xf0, 0x0f, 0xf3, 0xcf, 0x03, 0xc0,
-  0x03, 0xc0, 0xf3, 0xcf, 0xf0, 0x0f, 0xe8, 0x17, 0xc6, 0x63, 0xce, 0x73, 0xfe, 0x7f, 0xfe, 0x7f
-};
+void setTextSize(int size) {
+  textSize = size;
+  display.setTextSize(size);
+}
 
 void initializeWlan() {
   Serial.println("Connecting to Wi-Fi");
@@ -42,7 +41,7 @@ void initializeWlan() {
 void initializeDisplay() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.setTextColor(WHITE);
-  display.setTextSize(1);
+  setTextSize(1);
   display.clearDisplay();
 }
 
@@ -62,7 +61,7 @@ String replaceSpecialCharactersForLcd(String text) {
 // prints the line and cut it to length of line if needed
 void printLineCut(byte lineIndex, String text) {
   String replacedText = replaceSpecialCharactersForLcd(text);
-  display.setCursor(0, lineIndex * 10);
+  display.setCursor(0, lineIndex * 10 * textSize);
   if (replacedText.length() > 20) {
     replacedText = replacedText.substring(0, 20);
   }
@@ -92,8 +91,15 @@ void setup() {
 void loop() {
   if (updateWeatherData()) {
     display.clearDisplay();
-    printLineCut(0, String(WEATHER_CITY) + ": " + String(currentWeather.temperatureCelsius) + "°");
-    printLineCut(1, currentWeather.weatherDescription);
+    setTextSize(2);
+    printLineCut(0, String(WEATHER_CITY));
+    printLineCut(1, String(currentWeather.temperatureCelsius) + "°");
+    if (currentWeather.iconBitmapSet) {
+      display.drawBitmap(78, 16, currentWeather.iconBitmap, 50, 50, WHITE);
+    } else {
+      // no bitmap found, so print text
+      printLineCut(2, currentWeather.weatherDescription);
+    }
     display.display();
   }
 }
