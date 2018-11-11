@@ -1,5 +1,5 @@
 # oled-weather-display
-Displays weather information with an ESP8266 (NodeMCU)
+Displays weather information with an ESP8266 (NodeMCU) on an OLED display
 
 Used hardware:
 * Nodemcu (ESP8266 board)
