@@ -16,11 +16,19 @@ typedef struct {
   boolean iconBitmapSet;
 } WeatherData;
 
+typedef struct {
+  // 9:00, 15:00, 21:00, 3:00
+  WeatherData weather[4];
+  String time[4]; // store the time by array index (corresponds to index of weather)
+  String error;
+} ForecastWeatherData;
+
 class Weather
 {
   public:
     Weather(String key);
     WeatherData getCurrentWeather(String city);
+    ForecastWeatherData getForecastWeather(String city);
 };
 
 #endif

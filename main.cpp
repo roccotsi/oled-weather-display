@@ -11,8 +11,10 @@ Adafruit_SSD1306 display(OLED_RESET); // SCL: D1, SDA: D2
 
 Weather weather(OPEN_WEATHER_MAP_APP_ID);
 WeatherData currentWeather;
+ForecastWeatherData forecastWeather;
 unsigned long lastWeatherUpdateMillis = 0;
 unsigned long updateWeatherIntervalMillis = WEATHER_UPDATE_INTERVAL_MILLIS;
+int displayWaitTime = 5000; // 5 seconds per page
 int textSize = 1;
 
 #if (SSD1306_LCDHEIGHT != 64)
@@ -75,10 +77,47 @@ boolean updateWeatherData() {
 
   if (lastWeatherUpdateMillis == 0 || intervalSinceLastUpdate > updateWeatherIntervalMillis) {
     currentWeather = weather.getCurrentWeather(WEATHER_CITY);
+    forecastWeather = weather.getForecastWeather(WEATHER_CITY);
+    Serial.println("Weather updated");
     lastWeatherUpdateMillis = currentMillis;
     return true;
   }
   return false;
+}
+
+void displayCurrentWeather() {
+  display.clearDisplay();
+  setTextSize(2);
+  printLineCut(0, String(WEATHER_CITY));
+  if (currentWeather.iconBitmapSet) {
+    printLineCut(1, String(currentWeather.temperatureCelsius) + "°");
+    display.drawBitmap(78, 18, currentWeather.iconBitmap, 50, 50, WHITE);
+  } else {
+    // no bitmap found, so print text and icon name
+    printLineCut(1, String(currentWeather.temperatureCelsius) + "° (" + currentWeather.icon + ")");
+    printLineCut(2, currentWeather.weatherDescription);
+  }
+  display.display();
+}
+
+void displayForecastWeather() {
+  int index = 0;
+  while (index < 4) {
+    display.clearDisplay();
+    setTextSize(2);
+    printLineCut(0, forecastWeather.time[index]);
+    if (forecastWeather.weather[index].iconBitmapSet) {
+      printLineCut(1, String(forecastWeather.weather[index].temperatureCelsius) + "°");
+      display.drawBitmap(78, 18, forecastWeather.weather[index].iconBitmap, 50, 50, WHITE);
+    } else {
+      // no bitmap found, so print text and icon name
+      printLineCut(1, String(forecastWeather.weather[index].temperatureCelsius) + "° (" + forecastWeather.weather[index].icon + ")");
+      printLineCut(2, forecastWeather.weather[index].weatherDescription);
+    }
+    display.display();
+    delay(displayWaitTime);
+    index++;
+  }
 }
 
 void setup() {
@@ -89,18 +128,8 @@ void setup() {
 }
 
 void loop() {
-  if (updateWeatherData()) {
-    display.clearDisplay();
-    setTextSize(2);
-    printLineCut(0, String(WEATHER_CITY));
-    if (currentWeather.iconBitmapSet) {
-      printLineCut(1, String(currentWeather.temperatureCelsius) + "°");
-      display.drawBitmap(78, 18, currentWeather.iconBitmap, 50, 50, WHITE);
-    } else {
-      // no bitmap found, so print text and icon name
-      printLineCut(1, String(currentWeather.temperatureCelsius) + "° (" + currentWeather.icon + ")");
-      printLineCut(2, currentWeather.weatherDescription);
-    }
-    display.display();
-  }
+  updateWeatherData();
+  displayCurrentWeather();
+  delay(displayWaitTime);
+  displayForecastWeather();
 }

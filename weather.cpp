@@ -378,3 +378,135 @@ WeatherData Weather::getCurrentWeather(String city)
   }
   return weatherData;
 }
+
+ForecastWeatherData Weather::getForecastWeather(String city) {
+  ForecastWeatherData weatherData;
+
+  if (city.length() == 0) {
+    weatherData.error = "no city specified";
+    return weatherData;
+  }
+  String url = FORECAST_URL_TEMPLATE;
+  url.replace("%1", city);
+  url.replace("%2", _key);
+
+  Serial.println("Calling URL...");
+  String payload = callUrlAndGetResponse(url);
+  if (payload.length() == 0) {
+    weatherData.error = "No weather data received";
+    return weatherData;
+  }
+
+  // forecast JSON is too big for this small device, so parse it with String functions
+  unsigned int startPos = 0;
+  unsigned int index = 0;
+  int foundIndex = payload.indexOf("dt", startPos);
+  int weatherTimeIndex = 0;
+  while (foundIndex != -1) {
+    // search temp
+    foundIndex = payload.indexOf("main", foundIndex);
+    if (foundIndex == -1) {
+      break;
+    }
+    foundIndex = payload.indexOf("\"temp\":", foundIndex);
+    if (foundIndex == -1) {
+      break;
+    }
+    int endIndex = payload.indexOf(",", foundIndex);
+    if (endIndex == -1) {
+      break;
+    }
+    String tempText = payload.substring(foundIndex + 7, endIndex);
+    Serial.println(tempText);
+    int tempInt = tempText.toInt();
+
+    // search weather
+    foundIndex = payload.indexOf("\"weather\":", foundIndex);
+    if (foundIndex == -1) {
+      break;
+    }
+    foundIndex = payload.indexOf("\"description\":", foundIndex);
+    if (foundIndex == -1) {
+      break;
+    }
+    endIndex = payload.indexOf("\"", foundIndex + 16);
+    if (endIndex == -1) {
+      break;
+    }
+    String weatherText = payload.substring(foundIndex + 15, endIndex);
+    Serial.println(weatherText);
+    foundIndex = payload.indexOf("\"icon\":", foundIndex);
+    if (foundIndex == -1) {
+      break;
+    }
+    endIndex = payload.indexOf("\"", foundIndex + 9);
+    if (endIndex == -1) {
+      break;
+    }
+    String iconText = payload.substring(foundIndex + 8, endIndex);
+    Serial.println(iconText);
+
+    // search dateTime
+    foundIndex = payload.indexOf("\"dt_txt\":", foundIndex);
+    if (foundIndex == -1) {
+      break;
+    }
+    endIndex = payload.indexOf("}", foundIndex);
+    if (endIndex == -1) {
+      break;
+    }
+    String dateTimeText = payload.substring(foundIndex + 10, endIndex - 1);
+    dateTimeText = dateTimeText.substring(11); // remove date
+    dateTimeText.replace(":00:00", ":00");
+    Serial.println(dateTimeText);
+    foundIndex = payload.indexOf("dt", endIndex); // search next time
+
+    if (weatherTimeIndex < 4 && (dateTimeText.equals("03:00") || dateTimeText.equals("09:00") || dateTimeText.equals("15:00") || dateTimeText.equals("21:00"))) {
+      weatherData.time[weatherTimeIndex] = dateTimeText;
+      weatherData.weather[weatherTimeIndex].temperatureCelsius = tempInt;
+      weatherData.weather[weatherTimeIndex].weatherDescription = weatherText;
+      weatherData.weather[weatherTimeIndex].icon = iconText;
+      if (String("01d").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic01d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("01n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic01n;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("02d").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic02d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("02n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic02n;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("03d").equals(iconText) || String("03n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic03d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("04d").equals(iconText) || String("04n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic04d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("09d").equals(iconText) || String("09n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic09d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("10d").equals(iconText) || String("10n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic10d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("11d").equals(iconText) || String("11n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic11d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("13d").equals(iconText) || String("13n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic13d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else if (String("50d").equals(iconText) || String("50n").equals(iconText)) {
+        weatherData.weather[weatherTimeIndex].iconBitmap = pic50d;
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = true;
+      } else {
+        weatherData.weather[weatherTimeIndex].iconBitmapSet = false;
+      }
+      weatherTimeIndex++;
+    }
+
+    index++;
+  }
+
+  return weatherData;
+}
