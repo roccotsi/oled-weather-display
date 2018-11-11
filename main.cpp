@@ -93,11 +93,12 @@ void loop() {
     display.clearDisplay();
     setTextSize(2);
     printLineCut(0, String(WEATHER_CITY));
-    printLineCut(1, String(currentWeather.temperatureCelsius) + "°");
     if (currentWeather.iconBitmapSet) {
-      display.drawBitmap(78, 16, currentWeather.iconBitmap, 50, 50, WHITE);
+      printLineCut(1, String(currentWeather.temperatureCelsius) + "°");
+      display.drawBitmap(78, 18, currentWeather.iconBitmap, 50, 50, WHITE);
     } else {
-      // no bitmap found, so print text
+      // no bitmap found, so print text and icon name
+      printLineCut(1, String(currentWeather.temperatureCelsius) + "° (" + currentWeather.icon + ")");
       printLineCut(2, currentWeather.weatherDescription);
     }
     display.display();

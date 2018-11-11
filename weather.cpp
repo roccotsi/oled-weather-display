@@ -304,48 +304,6 @@ String callUrlAndGetResponse(String url) {
   return "";
 }
 
-void setIconBitmp(WeatherData weatherData, String icon) {
-  Serial.println(icon);
-  if (icon == "01d") {
-    weatherData.iconBitmap = pic01d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "01n") {
-    weatherData.iconBitmap = pic01n;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "02d") {
-    weatherData.iconBitmap = pic02d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "02n") {
-    weatherData.iconBitmap = pic02n;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "03d") {
-    weatherData.iconBitmap = pic03d;
-    weatherData.iconBitmapSet = true;
-  } else if (String("04d").equals(icon)) {
-    weatherData.iconBitmap = pic04d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "09d") {
-    weatherData.iconBitmap = pic09d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "10d") {
-    weatherData.iconBitmap = pic10d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "11d") {
-    weatherData.iconBitmap = pic11d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "13d") {
-    weatherData.iconBitmap = pic13d;
-    weatherData.iconBitmapSet = true;
-  } else if (icon == "50d") {
-    weatherData.iconBitmap = pic50d;
-    weatherData.iconBitmapSet = true;
-  } else {
-    weatherData.iconBitmapSet = false;
-  }
-  weatherData.iconBitmap = pic10d;
-  weatherData.iconBitmapSet = true;
-}
-
 WeatherData Weather::getCurrentWeather(String city)
 {
   WeatherData weatherData;
@@ -394,25 +352,25 @@ WeatherData Weather::getCurrentWeather(String city)
   } else if (String("02n").equals(icon)) {
     weatherData.iconBitmap = pic02n;
     weatherData.iconBitmapSet = true;
-  } else if (String("03d").equals(icon)) {
+  } else if (String("03d").equals(icon) || String("03n").equals(icon)) {
     weatherData.iconBitmap = pic03d;
     weatherData.iconBitmapSet = true;
-  } else if (String("04d").equals(icon)) {
+  } else if (String("04d").equals(icon) || String("04n").equals(icon)) {
     weatherData.iconBitmap = pic04d;
     weatherData.iconBitmapSet = true;
-  } else if (String("09d").equals(icon)) {
+  } else if (String("09d").equals(icon) || String("09n").equals(icon)) {
     weatherData.iconBitmap = pic09d;
     weatherData.iconBitmapSet = true;
-  } else if (String("10d").equals(icon)) {
+  } else if (String("10d").equals(icon) || String("10n").equals(icon)) {
     weatherData.iconBitmap = pic10d;
     weatherData.iconBitmapSet = true;
-  } else if (String("11d").equals(icon)) {
+  } else if (String("11d").equals(icon) || String("11n").equals(icon)) {
     weatherData.iconBitmap = pic11d;
     weatherData.iconBitmapSet = true;
-  } else if (String("13d").equals(icon)) {
+  } else if (String("13d").equals(icon) || String("13n").equals(icon)) {
     weatherData.iconBitmap = pic13d;
     weatherData.iconBitmapSet = true;
-  } else if (String("50d").equals(icon)) {
+  } else if (String("50d").equals(icon) || String("50n").equals(icon)) {
     weatherData.iconBitmap = pic50d;
     weatherData.iconBitmapSet = true;
   } else {
