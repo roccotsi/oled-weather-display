@@ -3,8 +3,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <ESP8266WiFi.h>
-#include <Weather.h>
-#include <Settings.h>
+#include <weather.h>
+#include <settings.h>
 
 #define OLED_RESET LED_BUILTIN  //4
 Adafruit_SSD1306 display(OLED_RESET); // SCL: D1, SDA: D2

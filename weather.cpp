@@ -3,7 +3,7 @@
   Created by Patrick Lenger, 2018
 */
 #include "Arduino.h"
-#include "Weather.h"
+#include "weather.h"
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
