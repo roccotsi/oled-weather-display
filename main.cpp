@@ -16,6 +16,7 @@ unsigned long lastWeatherUpdateMillis = 0;
 unsigned long updateWeatherIntervalMillis = WEATHER_UPDATE_INTERVAL_MILLIS;
 int displayWaitTime = 5000; // 5 seconds per page
 int textSize = 1;
+bool displayOn = true;
 
 #if (SSD1306_LCDHEIGHT != 64)
 #error("Height incorrect, please fix Adafruit_SSD1306.h!");
@@ -120,6 +121,15 @@ void displayForecastWeather() {
   }
 }
 
+void turnDisplayOnOff(bool on) {
+  displayOn = on;
+  if (on) {
+    display.ssd1306_command(SSD1306_DISPLAYON);
+  } else {
+    display.ssd1306_command(SSD1306_DISPLAYOFF);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   initializeDisplay();
@@ -129,7 +139,14 @@ void setup() {
 
 void loop() {
   updateWeatherData();
-  displayCurrentWeather();
-  delay(displayWaitTime);
-  displayForecastWeather();
+  if (displayOn) {
+    displayCurrentWeather();
+    delay(displayWaitTime);
+    displayForecastWeather();
+    turnDisplayOnOff(false);
+  }
+  int val = digitalRead(D7);
+  if (val == 1) {
+    turnDisplayOnOff(true);
+  }
 }
