@@ -8,10 +8,10 @@ Used hardware:
 Used libraries:
 * SPI
 * Wire
-* Adafruit_GFX
-* Adafruit_SSD1306
+* Adafruit_GFX (Adafruit GFX Library by Adafruit)
+* Adafruit_SSD1306 (Adafruit SSD1306 by Adafruit)
 * Arduino
-* ArduinoJson
+* ArduinoJson (ArduinoJson by Benoit Blanchon)
 * ESP8266WiFi
 * ESP8266HTTPClient
 
@@ -23,3 +23,5 @@ Connection of display on NodeMCU (via I2C):
 * VCC: Pin 3V
 * SDA: Pin D2
 * SCL: Pin D1
+
+Connect button to PIN D7.
