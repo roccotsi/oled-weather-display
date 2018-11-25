@@ -5,10 +5,12 @@
 #include <ESP8266WiFi.h>
 #include <weather.h>
 #include <settings.h>
+#include <wlan_setup.h>
 
 #define OLED_RESET LED_BUILTIN  //4
 Adafruit_SSD1306 display(OLED_RESET); // SCL: D1, SDA: D2
 
+WlanSetup wlanSetup = WlanSetup();
 Weather weather(OPEN_WEATHER_MAP_APP_ID);
 WeatherData currentWeather;
 ForecastWeatherData forecastWeather;
@@ -25,20 +27,6 @@ bool displayOn = true;
 void setTextSize(int size) {
   textSize = size;
   display.setTextSize(size);
-}
-
-void initializeWlan() {
-  Serial.println("Connecting to Wi-Fi");
-  display.println("Verbinde mit WLAN...");
-  display.display();
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin (WLAN_SSID, WLAN_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-  Serial.println("WiFi connected");
 }
 
 void initializeDisplay() {
@@ -69,6 +57,43 @@ void printLineCut(byte lineIndex, String text) {
     replacedText = replacedText.substring(0, 20);
   }
   display.print(replacedText);
+}
+
+bool initializeWlan() {
+  setTextSize(1);
+  Serial.println("Connecting to Wi-Fi");
+  printLineCut(0, "Verbinde mit WLAN...");
+  display.display();
+
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin (WLAN_SSID, WLAN_PASSWORD);
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   Serial.print(".");
+  //   delay(500);
+  // }
+  bool successful = wlanSetup.connect(WLAN_SSID, WLAN_PASSWORD, 10);
+  if (successful) {
+    Serial.println("WiFi connected");
+    return true;
+  } else {
+    Serial.println("WiFi not connected");
+    display.clearDisplay();
+    printLineCut(0, "Verbindung fehlgeschlagen");
+    display.display();
+    delay(displayWaitTime);
+    return false;
+  }
+}
+
+void reconnectWlan() {
+  initializeWlan();
+  if ((WiFi.status() != WL_CONNECTED)) {
+    display.clearDisplay();
+    setTextSize(2);
+    printLineCut(0, "Kein WLAN");
+    display.display();
+    delay(displayWaitTime);
+  }
 }
 
 boolean updateWeatherData() {
@@ -138,15 +163,19 @@ void setup() {
 }
 
 void loop() {
-  updateWeatherData();
-  if (displayOn) {
-    displayCurrentWeather();
-    delay(displayWaitTime);
-    displayForecastWeather();
-    turnDisplayOnOff(false);
-  }
-  int val = digitalRead(D7);
-  if (val == 1) {
-    turnDisplayOnOff(true);
+  if ((WiFi.status() == WL_CONNECTED)) {
+    updateWeatherData();
+    if (displayOn) {
+      displayCurrentWeather();
+      delay(displayWaitTime);
+      displayForecastWeather();
+      turnDisplayOnOff(false);
+    }
+    int val = digitalRead(D7);
+    if (val == 1) {
+      turnDisplayOnOff(true);
+    }
+  } else {
+    reconnectWlan();
   }
 }
