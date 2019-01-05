@@ -60,6 +60,7 @@ void printLineCut(byte lineIndex, String text) {
 }
 
 bool initializeWlan() {
+  display.clearDisplay();
   setTextSize(1);
   Serial.println("Connecting to Wi-Fi");
   printLineCut(0, "Verbinde mit WLAN...");
