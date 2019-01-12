@@ -24,4 +24,4 @@ Connection of display on NodeMCU (via I2C):
 * SDA: Pin D2
 * SCL: Pin D1
 
-Connect button to PIN D7.
+Connect button to PIN D7 with pulldown resistor (10kOhm) to GND.
